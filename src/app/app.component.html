@@ -1,0 +1,31 @@
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav #sidenav class="sidenav" mode="over">
+    <div class="sidenav-content">
+      <app-logo></app-logo>
+      <mat-divider class="sidenav-divider"></mat-divider>
+      <app-search></app-search>
+      <div class="user-section">
+        <app-user-card
+          *ngIf="user; else loginRegister"
+          [user]="user"
+        ></app-user-card>
+
+        <ng-template #loginRegister>
+          <div class="login-register-options">
+            <button mat-stroked-button routerLink="/login">Entrar</button>
+            <button mat-raised-button color="primary" routerLink="/register">
+              Registrar
+            </button>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <div class="container white-bg">
+      <app-header (menuClick)="sidenav.toggle()"></app-header>
+      <router-outlet></router-outlet>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

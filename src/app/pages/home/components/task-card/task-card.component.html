@@ -1,0 +1,37 @@
+<mat-card>
+  <mat-card-header class="header">
+    <mat-card-title class="gray-4">{{ task.title }}</mat-card-title>
+    <span class="spacer"></span>
+    <button mat-icon-button [matMenuTriggerFor]="menu" class="menu-button">
+      <mat-icon class="gray-3">more_vert</mat-icon>
+    </button>
+    <mat-menu #menu="matMenu" xPosition="after">
+      <button mat-menu-item (click)="editTask(task)">Editar</button>
+      <button mat-menu-item (click)="deleteTask(task)">Excluir</button>
+    </mat-menu>
+  </mat-card-header>
+  <mat-chip-listbox class="category-list">
+    <mat-chip
+      *ngFor="let category of task.categories"
+      [ngStyle]="{
+        'background-color': (category.name | categoryBackgroundColor)
+      }"
+    >
+      <span [ngStyle]="{ color: (category.name | categoryTextColor) }">{{
+        category.name
+      }}</span>
+    </mat-chip>
+  </mat-chip-listbox>
+
+  <mat-card-content>
+    <p class="gray-3">{{ task.description }}</p>
+  </mat-card-content>
+  <mat-card-actions>
+    <img
+      class="user-image"
+      [src]="user.photo"
+      (error)="user.photo = 'assets/images/default-user.jpeg'"
+      alt="Imagem do usuário"
+    />
+  </mat-card-actions>
+</mat-card>

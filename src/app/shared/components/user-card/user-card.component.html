@@ -1,0 +1,17 @@
+<mat-menu #userMenu="matMenu" xPosition="before">
+  <button mat-menu-item routerLink="/register">Editar</button>
+  <button mat-menu-item (click)="logout()">Sair</button>
+</mat-menu>
+
+<div class="user-card" [matMenuTriggerFor]="userMenu">
+  <img
+    [src]="user.photo"
+    (error)="user.photo = 'assets/images/default-user.jpeg'"
+    alt="User"
+    class="user-avatar"
+  />
+  <div class="user-details">
+    <span class="user-name">{{ user.name }}</span>
+    <span class="user-email">{{ user.email }}</span>
+  </div>
+</div>

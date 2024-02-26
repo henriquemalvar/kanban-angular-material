@@ -1,0 +1,38 @@
+<div class="container">
+  <div class="header">
+    <span class="title gray-4">Chameleon Stack</span>
+    <button
+      mat-raised-button
+      color="primary"
+      class="primary-bg large-button"
+      (click)="openDialog()"
+    >
+      Nova Task
+    </button>
+  </div>
+  <div class="body">
+    <div class="col" *ngFor="let header of headers">
+      <div class="header-col">
+        <div class="header-col-title gray-3">
+          {{ header }}
+          <mat-chip class="gray-2-bg">
+            <span>{{ getCardsByStatus(header).length }}</span>
+          </mat-chip>
+        </div>
+      </div>
+      <button
+        mat-button
+        class="ghost-button gray-3 gray-2-bg"
+        (click)="openDialog(header)"
+      >
+        <mat-icon>add</mat-icon>
+        <span>Nova task</span>
+      </button>
+      <div class="content gray-2-bg">
+        <ng-container *ngFor="let item of getCardsByStatus(header)">
+          <app-task-card [task]="item"></app-task-card>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</div>

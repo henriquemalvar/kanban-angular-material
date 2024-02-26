@@ -1,0 +1,39 @@
+<div class="container">
+  <div class="custom-toolbar">
+    <app-logo class="logo"></app-logo>
+
+    <div class="search-section">
+      <app-search></app-search>
+    </div>
+    <div class="user-section">
+      <app-user-card
+        *ngIf="user; else loginRegister"
+        [user]="user"
+      ></app-user-card>
+
+      <ng-template #loginRegister>
+        <div class="login-register-options">
+          <button
+            mat-stroked-button
+            class="ghost-button gray-4"
+            routerLink="/login"
+          >
+            Entrar
+          </button>
+          <button
+            mat-flat-button
+            color="primary"
+            class="primary-bg"
+            routerLink="/register"
+          >
+            Registrar
+          </button>
+        </div>
+      </ng-template>
+    </div>
+    <mat-icon class="menu-icon mobile-only" (click)="menuClick.emit()"
+      >menu</mat-icon
+    >
+  </div>
+  <mat-divider></mat-divider>
+</div>
