@@ -1,0 +1,57 @@
+mat-card {
+  width: 100%;
+  padding: 0 10px;
+  background: #fff;
+  border-radius: 10px;
+
+  @media (max-width: 600px) {
+    width: 90%;
+  }
+}
+
+.header,
+.category-list {
+  display: flex;
+  align-items: center;
+}
+
+.header {
+  justify-content: space-between;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.category-list {
+  flex-wrap: wrap;
+  margin: 10px;
+}
+.user-image {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  float: left;
+}
+
+$categories: (
+  bug: #f97316,
+  melhoria: #3b82f6,
+  feature: #10b981,
+  sprint: #eab308,
+  review: #6b7280,
+  nao-planejada: #8b5cf6,
+  urgente: #ef4444,
+  estoria: #a25b5b,
+);
+
+@each $category, $color in $categories {
+  .mat-chip.#{$category} {
+    background-color: darken($color, 15%) !important;
+    color: $color !important;
+  }
+  .mat-mdc-standard-chip:not(.mdc-evolution-chip--disabled)
+    .mdc-evolution-chip__text-label {
+    color: $color !important;
+  }
+}

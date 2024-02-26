@@ -1,0 +1,97 @@
+<h3 mat-dialog-title class="title gray-3" [ngSwitch]="mode">
+  <ng-container *ngSwitchCase="'create'">Nova Tarefa</ng-container>
+  <ng-container *ngSwitchCase="'update'">Editar Tarefa</ng-container>
+</h3>
+
+<mat-dialog-content class="content">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form">
+    <mat-form-field appearance="outline" class="form-field">
+      <mat-label>Nome</mat-label>
+      <input
+        matInput
+        type="text"
+        formControlName="title"
+        placeholder="Nome da tarefa"
+      />
+      <mat-error *ngIf="hasError('title', 'required')">
+        O nome é obrigatório
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="form-field">
+      <mat-label>Descrição</mat-label>
+      <textarea
+        matInput
+        type="text"
+        formControlName="description"
+        placeholder="Descrição da tarefa"
+        rows="5"
+        class="no-resize"
+      ></textarea>
+      <mat-error *ngIf="hasError('description', 'required')">
+        A descrição é obrigatória
+      </mat-error>
+    </mat-form-field>
+
+    <div class="flex-container">
+      <mat-form-field appearance="outline" class="form-field flex-item">
+        <mat-label>Status</mat-label>
+        <mat-select formControlName="status">
+          <mat-option
+            *ngFor="let status of statusOptions"
+            [value]="status.value"
+          >
+            {{ status.label }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="hasError('status', 'required')">
+          O status é obrigatório
+        </mat-error>
+      </mat-form-field>
+    </div>
+    <div class="flex-column" *ngIf="mode === 'update'">
+      <label id="listboxLabel">Categorias</label>
+      <mat-chip-listbox #chipList multiple aria-labelledby="listboxLabel">
+        <ng-container *ngFor="let category of categoriesOptions">
+          <mat-chip
+            *ngIf="isCategorySelected(category.label)"
+            [ngStyle]="{
+              'background-color': category.label | categoryBackgroundColor
+            }"
+            color="primary"
+            (click)="toggleCategory(category)"
+          >
+            <span [ngStyle]="{ color: category.label | categoryTextColor }">{{
+              category.label
+            }}</span>
+          </mat-chip>
+          <mat-chip
+            *ngIf="!isCategorySelected(category.label)"
+            (click)="toggleCategory(category)"
+          >
+            {{ category.label }}
+          </mat-chip>
+        </ng-container>
+      </mat-chip-listbox>
+    </div>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions [align]="'end'" class="actions">
+  <button
+    mat-stroked-button
+    type="button"
+    class="cancel-button gray-4"
+    (click)="onCancel()"
+  >
+    Cancelar
+  </button>
+  <button
+    mat-raised-button
+    color="primary"
+    class="primary-bg"
+    type="submit"
+    (click)="onSubmit()"
+  >
+    Salvar
+  </button>
+</mat-dialog-actions>

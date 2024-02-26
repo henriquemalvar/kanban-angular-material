@@ -1,0 +1,51 @@
+
+<div class="content">
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form">
+    <h3 class="title gray-3">Entrar</h3>
+    <mat-form-field appearance="outline" class="form-field">
+      <mat-label>Email</mat-label>
+      <input
+        matInput
+        formControlName="email"
+        type="email"
+        placeholder="Insira seu email"
+      />
+      <mat-error
+        *ngIf="form.get('email')?.invalid && form.get('email')?.touched"
+      >
+        Por favor, insira um email válido.
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="form-field">
+      <mat-label>Senha</mat-label>
+      <input
+        matInput
+        formControlName="password"
+        [type]="hide ? 'password' : 'text'"
+        placeholder="Insira sua senha"
+      />
+      <button mat-icon-button matSuffix (click)="hide = !hide">
+        <mat-icon>{{ hide ? "visibility_off" : "visibility" }}</mat-icon>
+      </button>
+      <mat-error
+        *ngIf="form.get('password')?.invalid && form.get('password')?.touched"
+      >
+        A senha é obrigatória.
+      </mat-error>
+    </mat-form-field>
+    <div [align]="'end'" class="actions">
+      
+      <button
+        mat-raised-button
+        color="primary"
+        type="submit"
+        [disabled]="form.invalid"
+        (click)="onSubmit()"
+      >
+        Entrar
+      </button>
+    </div>
+  </form>
+</div>
+

@@ -1,0 +1,21 @@
+<h3 mat-dialog-title class="title gray-3">
+  {{ title }}
+</h3>
+
+<mat-dialog-content class="content">
+  <p>{{ message }}</p>
+</mat-dialog-content>
+
+<mat-dialog-actions [align]="'end'" class="actions">
+  <button
+    mat-stroked-button
+    type="button"
+    class="cancel-button gray-4"
+    (click)="onCancel()"
+  >
+    Cancelar  
+  </button>
+  <button mat-raised-button color="primary" type="button" class="primary-bg" (click)="onConfirm()">
+    Confirmar
+  </button>
+</mat-dialog-actions>
