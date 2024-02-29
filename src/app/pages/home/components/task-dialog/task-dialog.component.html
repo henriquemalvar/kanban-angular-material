@@ -49,7 +49,7 @@
         </mat-error>
       </mat-form-field>
     </div>
-    <div class="flex-column" *ngIf="mode === 'update'">
+    <div class="flex-column">
       <label id="listboxLabel">Categorias</label>
       <mat-chip-listbox #chipList multiple aria-labelledby="listboxLabel">
         <ng-container *ngFor="let category of categoriesOptions">

@@ -66,14 +66,15 @@ export class RegisterComponent implements OnInit {
     formData.append('name', this.registerForm.get('name')?.value);
     formData.append('email', this.registerForm.get('email')?.value);
     formData.append('password', this.registerForm.get('password')?.value);
-    formData.append(
-      'new_password',
-      this.registerForm.get('new_password')?.value
-    );
+    if (this.user)
+      formData.append(
+        'new_password',
+        this.registerForm.get('new_password')?.value
+      );
     if (this.selectedImageFile) formData.append('file', this.selectedImageFile);
 
     if (this.user) {
-      await this.updateUser(this.user.id, formData);
+      await this.updateUser(this.user._id, formData);
     } else {
       await this.createUser(formData);
     }
@@ -85,8 +86,9 @@ export class RegisterComponent implements OnInit {
       this.snackBar.open('Usuário criado com sucesso!', 'Fechar', {
         duration: 3000,
       });
+      console.log('🚀 ~ RegisterComponent ~ createUser ~ user._id:', user._id);
 
-      await this.createDefaultCategories(user.id);
+      await this.createDefaultCategories(user._id);
     } catch (error: any) {
       this.snackBar.open('Erro ao criar usuário: ' + error.message, 'Fechar', {
         duration: 3000,
@@ -150,9 +152,9 @@ export class RegisterComponent implements OnInit {
     }
   }
 
-  private async updateUser(id: string, formData: FormData) {
+  private async updateUser(_id: string, formData: FormData) {
     try {
-      const userPromise = this.userService.update(id, formData);
+      const userPromise = this.userService.update(_id, formData);
       const user = await firstValueFrom(userPromise);
       this.snackBar.open('Usuário atualizado com sucesso!', 'Fechar', {
         duration: 3000,

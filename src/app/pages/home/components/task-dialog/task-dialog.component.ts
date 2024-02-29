@@ -5,15 +5,15 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { tap, catchError, of } from 'rxjs';
 
 import { CategoryService } from '@services/category/category.service';
-import { CardService } from '@services/card/card.service';
+import { TaskService } from '@services/task/task.service';
 import { TaskEventService } from '@services/task-event/task-event.service';
 
-import { Card } from '@interfaces/card/card.interface';
+import { Task } from '@interfaces/task/task.interface';
 import { User } from '@interfaces/user/user.interface';
 import { IOption } from '@interfaces/ioption/IOption.interface';
 
 interface DialogData {
-  task?: Card;
+  task?: Task;
   mode: 'create' | 'update';
   status: string;
 }
@@ -39,7 +39,7 @@ export class TaskDialogComponent implements OnInit {
   constructor(
     private formBuilder: FormBuilder,
     private dialogRef: MatDialogRef<TaskDialogComponent>,
-    private cardService: CardService,
+    private taskService: TaskService,
     private taskEventService: TaskEventService,
     private categoryService: CategoryService,
     private snackBar: MatSnackBar,
@@ -51,20 +51,20 @@ export class TaskDialogComponent implements OnInit {
       title: ['', Validators.required],
       description: ['', Validators.required],
       status: [data.status || '', Validators.required],
-      categories: [''],
-      category_ids: [''],
+      categories: ['', Validators.required],
+      categories_ids: ['', Validators.required],
     });
 
     if (this.mode === 'update') {
       this.form.get('categories')?.setValidators(Validators.required);
-      this.form.get('category_ids')?.setValidators(Validators.required);
+      this.form.get('categories_ids')?.setValidators(Validators.required);
       this.form.patchValue({
-        user_id: this.data?.task?.user_id || this.user?.id || '',
+        user_id: this.data?.task?.user_id || this.user?._id || '',
         title: this.data?.task?.title || '',
         description: this.data?.task?.description || '',
         status: this.data?.task?.status || this.data.status || '',
         categories: this.data?.task?.categories?.map((c) => c.name) || '',
-        category_ids: this.data?.task?.categories?.map((c) => c.id) || [],
+        categories_ids: this.data?.task?.categories?.map((c) => c._id) || [],
       });
     }
   }
@@ -73,23 +73,23 @@ export class TaskDialogComponent implements OnInit {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     this.user = user;
 
-    this.form.patchValue({ user_id: this.user.id });
+    this.form.patchValue({ user_id: this.user._id });
 
     await this.loadCategories();
   }
 
   private async loadCategories() {
-    if (!this.user.id) {
+    if (!this.user._id) {
       return;
     }
 
-    this.categoryService.get(this.user.id).subscribe((categories) => {
+    this.categoryService.get(this.user._id).subscribe((categories) => {
       if (!categories || categories.length === 0) {
         return;
       }
 
       this.categoriesOptions = categories.map((category) => ({
-        value: category.id!,
+        value: category._id!,
         label: category.name,
       }));
     });
@@ -124,12 +124,13 @@ export class TaskDialogComponent implements OnInit {
   }
 
   private createTask() {
-    const {categories, category_ids, ...rest} = this.form.value;
-    return this.cardService.create(this.user.id, rest);
+    const { categories, ...task } = this.form.value;
+    return this.taskService.create(this.user._id, task);
   }
 
   private updateTask() {
-    return this.cardService.update(this.data.task?.id || '', this.form.value);
+    const { categories, ...task } = this.form.value;
+    return this.taskService.update(this.data.task?._id || '', task);
   }
 
   public onCancel(): void {
@@ -138,23 +139,23 @@ export class TaskDialogComponent implements OnInit {
 
   public toggleCategory(category: IOption) {
     const categories = this.form.get('categories')?.value || [];
-    const category_ids = this.form.get('category_ids')?.value || [];
+    const categories_ids = this.form.get('categories_ids')?.value || [];
 
     if (categories.includes(category.label)) {
       this.form.patchValue({
         categories: categories.filter((c: string) => c !== category.label),
-        category_ids: category
-          ? category_ids.filter((c: string) => c !== category.value)
-          : category_ids,
+        categories_ids: category
+          ? categories_ids.filter((c: string) => c !== category.value)
+          : categories_ids,
       });
     }
 
     if (!categories.includes(category.label)) {
       this.form.patchValue({
         categories: [...categories, category.label],
-        category_ids: category
-          ? [...category_ids, category.value]
-          : category_ids,
+        categories_ids: category
+          ? [...categories_ids, category.value]
+          : categories_ids,
       });
     }
   }
