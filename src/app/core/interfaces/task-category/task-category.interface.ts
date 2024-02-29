@@ -1,4 +1,4 @@
-export interface CardCategory {
+export interface TaskCategory {
   cardId: string;
   categoryId: string;
 }

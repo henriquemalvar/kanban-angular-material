@@ -1,18 +1,17 @@
-import { Component, OnInit, Input } from "@angular/core";
+import { Component, OnInit, Input } from '@angular/core';
 
-import { MatDialog } from "@angular/material/dialog";
-import { MatSnackBar } from "@angular/material/snack-bar";
+import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
-import { Card } from "@interfaces/card/card.interface";
-import { User } from "@interfaces/user/user.interface";
+import { Task } from '@interfaces/task/task.interface';
+import { User } from '@interfaces/user/user.interface';
 
-import { AuthService } from "@services/auth/auth.service";
-import { CardService } from "@services/card/card.service";
-import { TaskEventService } from "@services/task-event/task-event.service";
+import { AuthService } from '@services/auth/auth.service';
+import { TaskService } from '@services/task/task.service';
+import { TaskEventService } from '@services/task-event/task-event.service';
 
-import { TaskDialogComponent } from "../task-dialog/task-dialog.component";
-import { ConfirmDialogComponent } from "@shared/components/confirm-dialog/confirm-dialog.component";
-
+import { TaskDialogComponent } from '../task-dialog/task-dialog.component';
+import { ConfirmDialogComponent } from '@shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-task-card',
@@ -20,12 +19,12 @@ import { ConfirmDialogComponent } from "@shared/components/confirm-dialog/confir
   styleUrls: ['./task-card.component.scss'],
 })
 export class TaskCardComponent implements OnInit {
-  @Input() task!: Card;
+  @Input() task!: Task;
   user!: User;
 
   constructor(
     private matDialog: MatDialog,
-    private cardService: CardService,
+    private taskService: TaskService,
     private authService: AuthService,
     private taskEventService: TaskEventService,
     private snackBar: MatSnackBar
@@ -42,7 +41,7 @@ export class TaskCardComponent implements OnInit {
       .unsubscribe();
   }
 
-  editTask(task: Card) {
+  editTask(task: Task) {
     this.matDialog.open(TaskDialogComponent, {
       width: '600px',
       disableClose: true,
@@ -53,7 +52,7 @@ export class TaskCardComponent implements OnInit {
     });
   }
 
-  deleteTask(task: Card) {
+  deleteTask(task: Task) {
     const dialogRef = this.matDialog.open(ConfirmDialogComponent, {
       width: '350px',
       disableClose: true,
@@ -67,7 +66,7 @@ export class TaskCardComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.cardService.delete(task.id).subscribe((response) => {
+        this.taskService.delete(task._id).subscribe((response) => {
           this.snackBar.open('Tarefa excluída com sucesso!', 'Fechar', {
             duration: 3000,
           });

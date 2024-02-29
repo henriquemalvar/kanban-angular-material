@@ -1,4 +1,4 @@
-import { Card } from '@interfaces/card/card.interface';
+import { Task } from '@interfaces/task/task.interface';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -9,33 +9,33 @@ import { environment } from '@environments/environment';
 @Injectable({
   providedIn: 'root',
 })
-export class CardService {
+export class TaskService {
   private baseUrl = environment.apiBaseUrl;
 
   constructor(private http: HttpClient) {}
 
-  create(userId: string, card: Card): Observable<Card> {
-    return this.http.post<Card>(`${this.baseUrl}/card/${userId}`, card);
+  create(userId: string, task: Task): Observable<Task> {
+    return this.http.post<Task>(`${this.baseUrl}/task/${userId}`, task);
   }
 
-  get(userId: string, filters?: Partial<Card>): Observable<Card[]> {
+  get(userId: string, filters?: Partial<Task>): Observable<Task[]> {
     let params = new HttpParams();
     if (filters) {
       Object.keys(filters).forEach((key) => {
-        const value = filters[key as keyof Card];
+        const value = filters[key as keyof Task];
         if (value !== null && value !== undefined) {
           params = params.append(key, value.toString());
         }
       });
     }
-    return this.http.get<Card[]>(`${this.baseUrl}/card/${userId}`, { params });
+    return this.http.get<Task[]>(`${this.baseUrl}/task/${userId}`, { params });
   }
 
   delete(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/card/${id}`);
+    return this.http.delete<void>(`${this.baseUrl}/task/${id}`);
   }
 
-  update(id: string, card: Card): Observable<Card> {
-    return this.http.patch<Card>(`${this.baseUrl}/card/${id}`, card);
+  update(id: string, task: Task): Observable<Task> {
+    return this.http.patch<Task>(`${this.baseUrl}/task/${id}`, task);
   }
 }

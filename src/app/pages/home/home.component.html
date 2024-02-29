@@ -11,26 +11,26 @@
     </button>
   </div>
   <div class="body">
-    <div class="col" *ngFor="let header of headers">
+    <div class="col" *ngFor="let status of headers">
       <div class="header-col">
         <div class="header-col-title gray-3">
-          {{ header }}
+          {{ status }}
           <mat-chip class="gray-2-bg">
-            <span>{{ getCardsByStatus(header).length }}</span>
+            <span>{{ getTasksByStatus(status).length }}</span>
           </mat-chip>
         </div>
       </div>
       <button
         mat-button
         class="ghost-button gray-3 gray-2-bg"
-        (click)="openDialog(header)"
+        (click)="openDialog(status)"
       >
         <mat-icon>add</mat-icon>
         <span>Nova task</span>
       </button>
       <div class="content gray-2-bg">
-        <ng-container *ngFor="let item of getCardsByStatus(header)">
-          <app-task-card [task]="item"></app-task-card>
+        <ng-container *ngFor="let task of getTasksByStatus(status)">
+          <app-task-card [task]="task"></app-task-card>
         </ng-container>
       </div>
     </div>
