@@ -3,8 +3,8 @@ import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 
 import { environment } from '@environments/environment';
-import { Session } from '@interfaces/session/session.interface';
-import { User } from '@interfaces/user/user.interface';
+import { ISession } from '@interfaces/session/session.interface';
+import { IUser } from '@interfaces/user/user.interface';
 
 @Injectable({
   providedIn: 'root',
@@ -14,8 +14,8 @@ export class AuthService {
 
   constructor(private http: HttpClient) {}
 
-  login(session: { email: string; password: string }): Observable<Session> {
-    return this.http.post<Session>(`${this.baseUrl}/user/session`, session);
+  login(session: { email: string; password: string }): Observable<ISession> {
+    return this.http.post<ISession>(`${this.baseUrl}/user/session`, session);
   }
 
   logout(): void {
@@ -23,7 +23,7 @@ export class AuthService {
     localStorage.removeItem('user');
   }
 
-  getCurrentUser(): Observable<User | null> {
+  getCurrentUser(): Observable<IUser | null> {
     const user = localStorage.getItem('user');
     if (user) {
       return of(JSON.parse(user));

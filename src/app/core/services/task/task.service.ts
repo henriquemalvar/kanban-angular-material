@@ -1,4 +1,4 @@
-import { Task } from '@interfaces/task/task.interface';
+import { ITask } from '@interfaces/task/task.interface';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -14,28 +14,28 @@ export class TaskService {
 
   constructor(private http: HttpClient) {}
 
-  create(userId: string, task: Task): Observable<Task> {
-    return this.http.post<Task>(`${this.baseUrl}/task/${userId}`, task);
+  create(userId: string, task: ITask): Observable<ITask> {
+    return this.http.post<ITask>(`${this.baseUrl}/task/${userId}`, task);
   }
 
-  get(userId: string, filters?: Partial<Task>): Observable<Task[]> {
+  get(userId: string, filters?: Partial<ITask>): Observable<ITask[]> {
     let params = new HttpParams();
     if (filters) {
       Object.keys(filters).forEach((key) => {
-        const value = filters[key as keyof Task];
+        const value = filters[key as keyof ITask];
         if (value !== null && value !== undefined) {
           params = params.append(key, value.toString());
         }
       });
     }
-    return this.http.get<Task[]>(`${this.baseUrl}/task/${userId}`, { params });
+    return this.http.get<ITask[]>(`${this.baseUrl}/task/${userId}`, { params });
   }
 
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/task/${id}`);
   }
 
-  update(id: string, task: Task): Observable<Task> {
-    return this.http.patch<Task>(`${this.baseUrl}/task/${id}`, task);
+  update(id: string, task: ITask): Observable<ITask> {
+    return this.http.put<ITask>(`${this.baseUrl}/task/${id}`, task);
   }
 }
