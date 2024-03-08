@@ -52,7 +52,12 @@
     <div class="flex-column">
       <div class="fxLayout" fxLayoutAlign="space-between center">
         <label id="listboxLabel">Categorias</label>
-        <mat-icon class="settings-icon" (click)="openCategoryDialog()" matTooltip="Gerenciar categorias">settings</mat-icon>
+        <mat-icon
+          class="settings-icon"
+          (click)="openCategoryDialog()"
+          matTooltip="Gerenciar categorias"
+          >settings</mat-icon
+        >
       </div>
 
       <mat-chip-listbox #chipList multiple aria-labelledby="listboxLabel">
@@ -74,7 +79,7 @@
         <mat-select
           panelClass="my-panel"
           multiple
-          formControlName="category_ids"
+          formControlName="categories_ids"
         >
           <mat-option
             *ngFor="let category of categoriesOptions"

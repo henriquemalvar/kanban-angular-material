@@ -91,7 +91,16 @@ export class HomeComponent implements OnInit {
       const movedItem = event.container.data[event.currentIndex];
       movedItem.status = event.container.id;
 
-      this.cardService.update(movedItem._id, movedItem).subscribe({
+      const updatedItem: ITask = {
+        _id: movedItem._id,
+        title: movedItem.title,
+        description: movedItem.description,
+        status: movedItem.status,
+        user_id: movedItem.user?._id!,
+        categories_ids: (movedItem.categories?.map((category) => category._id) || []).filter((id): id is string => id !== undefined),
+      };
+
+      this.cardService.update(movedItem._id, updatedItem).subscribe({
         next: (updatedCard: ITask) => {
           this.snackBar.open(
             'Status do cartão atualizado com sucesso!',

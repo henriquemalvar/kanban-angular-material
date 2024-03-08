@@ -22,7 +22,7 @@ import { CategoryDialogComponent } from '@shared/components/category-dialog/cate
 import { AuthService } from '@services/auth/auth.service';
 
 interface DialogData {
-  card?: ITask;
+  task?: ITask;
   status: string;
 }
 
@@ -55,23 +55,23 @@ export class TaskDialogComponent implements OnInit {
     private dialog: MatDialog,
     @Inject(MAT_DIALOG_DATA) public data: DialogData
   ) {
-    this.mode = data.card ? 'update' : 'create';
+    this.mode = data.task ? 'update' : 'create';
     this.form = this.formBuilder.group({
       user_id: ['', Validators.required],
       title: ['', Validators.required],
       description: ['', Validators.required],
       status: [data.status || '', Validators.required],
-      category_ids: [[], Validators.required],
+      categories_ids: [[], Validators.required],
     });
 
     if (this.mode === 'update') {
       this.form.patchValue({
-        user_id: this.data?.card?.user_id || this.user?._id || '',
-        title: this.data?.card?.title || '',
-        description: this.data?.card?.description || '',
-        status: this.data?.card?.status || this.data.status || '',
-        category_ids:
-          this.data?.card?.categories.map(
+        user_id: this.data?.task?.user_id || this.user?._id || '',
+        title: this.data?.task?.title || '',
+        description: this.data?.task?.description || '',
+        status: this.data?.task?.status || this.data.status || '',
+        categories_ids:
+          this.data?.task?.categories?.map(
             (category: ICategory) => category._id
           ) || [],
       });
@@ -93,11 +93,11 @@ export class TaskDialogComponent implements OnInit {
   }
 
   private async loadCategories() {
-    if (!this.user._id) {
+    if (!this.user || !this.user._id) {
       return;
     }
 
-    this.categoryService.get(this.user._id).subscribe((categories) => {
+    this.categoryService.get(this.user?._id).subscribe((categories) => {
       if (!categories || categories.length === 0) {
         return;
       }
@@ -139,7 +139,7 @@ export class TaskDialogComponent implements OnInit {
   }
 
   private updateTask() {
-    return this.cardService.update(this.data.card?._id || '', this.form.value);
+    return this.cardService.update(this.data.task?._id || '', this.form.value);
   }
 
   public onCancel(): void {
@@ -147,7 +147,7 @@ export class TaskDialogComponent implements OnInit {
   }
 
   public getSelectedCategories(): ICategory[] {
-    const categories_ids = this.form.get('category_ids')?.value;
+    const categories_ids = this.form.get('categories_ids')?.value;
     return (
       this.categoriesOptions.filter((category) =>
         categories_ids.includes(category._id)
