@@ -14,10 +14,10 @@
     <mat-chip
       *ngFor="let category of task.categories"
       [ngStyle]="{
-        'background-color': (category.name | categoryBackgroundColor)
+        'background-color': (category.color | categoryBackgroundColor)
       }"
     >
-      <span [ngStyle]="{ color: (category.name | categoryTextColor) }">{{
+      <span [ngStyle]="{ color: (category.color | categoryTextColor) }">{{
         category.name
       }}</span>
     </mat-chip>
