@@ -1,6 +1,6 @@
-import { Category } from '@interfaces/category/category.interface';
+import { ICategory } from '@interfaces/category/category.interface';
 
-export interface Task {
+export interface ITask {
   _id: string;
   status: string | 'Não iniciado' | 'Em progresso' | 'Completo';
   title: string;
@@ -8,5 +8,5 @@ export interface Task {
   createdAt: Date;
   updatedAt: Date;
   user_id: string;
-  categories: Category[];
+  categories: ICategory[];
 }
