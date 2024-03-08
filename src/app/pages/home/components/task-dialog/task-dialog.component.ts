@@ -1,20 +1,28 @@
-import { Component, OnInit, Inject } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { Component, Inject, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {
+  MAT_DIALOG_DATA,
+  MatDialog,
+  MatDialogRef,
+} from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { tap, catchError, of } from 'rxjs';
+import { catchError, of, tap } from 'rxjs';
 
-import { CategoryService } from '@services/category/category.service';
 import { TaskService } from '@services/task/task.service';
+import { CategoryService } from '@services/category/category.service';
 import { TaskEventService } from '@services/task-event/task-event.service';
+import { CategoryEventService } from '@services/category-event/category-event.service';
 
-import { Task } from '@interfaces/task/task.interface';
-import { User } from '@interfaces/user/user.interface';
-import { IOption } from '@interfaces/ioption/IOption.interface';
+import { ITask } from '@interfaces/task/task.interface';
+import { ICategory } from '@interfaces/category/category.interface';
+import { IOption } from '@interfaces/option/option.interface';
+import { IUser } from '@interfaces/user/user.interface';
+
+import { CategoryDialogComponent } from '@shared/components/category-dialog/category-dialog.component';
+import { AuthService } from '@services/auth/auth.service';
 
 interface DialogData {
-  task?: Task;
-  mode: 'create' | 'update';
+  card?: ITask;
   status: string;
 }
 
@@ -24,58 +32,64 @@ interface DialogData {
   styleUrls: ['./task-dialog.component.scss'],
 })
 export class TaskDialogComponent implements OnInit {
-  form!: FormGroup;
-  mode: 'create' | 'update';
-  user!: User;
+  public form!: FormGroup;
+  public mode: 'create' | 'update';
+  public user!: IUser;
 
+  public categoriesOptions: ICategory[] = [];
   public statusOptions: IOption[] = [
     { label: 'Não iniciado', value: 'Não iniciado' },
     { label: 'Em progresso', value: 'Em progresso' },
     { label: 'Completo', value: 'Completo' },
   ];
 
-  public categoriesOptions: IOption[] = [];
-
   constructor(
     private formBuilder: FormBuilder,
     private dialogRef: MatDialogRef<TaskDialogComponent>,
-    private taskService: TaskService,
+    private cardService: TaskService,
+    private authService: AuthService,
     private taskEventService: TaskEventService,
+    private categoryEventService: CategoryEventService,
     private categoryService: CategoryService,
     private snackBar: MatSnackBar,
+    private dialog: MatDialog,
     @Inject(MAT_DIALOG_DATA) public data: DialogData
   ) {
-    this.mode = data.mode;
+    this.mode = data.card ? 'update' : 'create';
     this.form = this.formBuilder.group({
       user_id: ['', Validators.required],
       title: ['', Validators.required],
       description: ['', Validators.required],
       status: [data.status || '', Validators.required],
-      categories: ['', Validators.required],
-      categories_ids: ['', Validators.required],
+      category_ids: [[], Validators.required],
     });
 
     if (this.mode === 'update') {
-      this.form.get('categories')?.setValidators(Validators.required);
-      this.form.get('categories_ids')?.setValidators(Validators.required);
       this.form.patchValue({
-        user_id: this.data?.task?.user_id || this.user?._id || '',
-        title: this.data?.task?.title || '',
-        description: this.data?.task?.description || '',
-        status: this.data?.task?.status || this.data.status || '',
-        categories: this.data?.task?.categories?.map((c) => c.name) || '',
-        categories_ids: this.data?.task?.categories?.map((c) => c._id) || [],
+        user_id: this.data?.card?.user_id || this.user?._id || '',
+        title: this.data?.card?.title || '',
+        description: this.data?.card?.description || '',
+        status: this.data?.card?.status || this.data.status || '',
+        category_ids:
+          this.data?.card?.categories.map(
+            (category: ICategory) => category._id
+          ) || [],
       });
     }
   }
 
   async ngOnInit(): Promise<void> {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    this.user = user;
+    this.authService.getCurrentUser().subscribe((user: IUser | null) => {
+      if (user) {
+        this.user = user;
+        this.form.patchValue({ user_id: this.user._id });
+        this.loadCategories();
+      }
+    });
 
-    this.form.patchValue({ user_id: this.user._id });
-
-    await this.loadCategories();
+    this.categoryEventService.get().subscribe(() => {
+      this.loadCategories();
+    });
   }
 
   private async loadCategories() {
@@ -88,10 +102,7 @@ export class TaskDialogComponent implements OnInit {
         return;
       }
 
-      this.categoriesOptions = categories.map((category) => ({
-        value: category._id!,
-        label: category.name,
-      }));
+      this.categoriesOptions = categories;
     });
   }
 
@@ -124,45 +135,24 @@ export class TaskDialogComponent implements OnInit {
   }
 
   private createTask() {
-    const { categories, ...task } = this.form.value;
-    return this.taskService.create(this.user._id, task);
+    return this.cardService.create(this.user._id, this.form.value);
   }
 
   private updateTask() {
-    const { categories, ...task } = this.form.value;
-    return this.taskService.update(this.data.task?._id || '', task);
+    return this.cardService.update(this.data.card?._id || '', this.form.value);
   }
 
   public onCancel(): void {
     this.dialogRef.close();
   }
 
-  public toggleCategory(category: IOption) {
-    const categories = this.form.get('categories')?.value || [];
-    const categories_ids = this.form.get('categories_ids')?.value || [];
-
-    if (categories.includes(category.label)) {
-      this.form.patchValue({
-        categories: categories.filter((c: string) => c !== category.label),
-        categories_ids: category
-          ? categories_ids.filter((c: string) => c !== category.value)
-          : categories_ids,
-      });
-    }
-
-    if (!categories.includes(category.label)) {
-      this.form.patchValue({
-        categories: [...categories, category.label],
-        categories_ids: category
-          ? [...categories_ids, category.value]
-          : categories_ids,
-      });
-    }
-  }
-
-  public isCategorySelected(category: string) {
-    const categories = this.form.get('categories')?.value || [];
-    return categories.includes(category);
+  public getSelectedCategories(): ICategory[] {
+    const categories_ids = this.form.get('category_ids')?.value;
+    return (
+      this.categoriesOptions.filter((category) =>
+        categories_ids.includes(category._id)
+      ) || []
+    );
   }
 
   public hasError(controlName: string, errorName: string) {
@@ -172,5 +162,12 @@ export class TaskDialogComponent implements OnInit {
 
   private openSnackBar(message: string) {
     this.snackBar.open(message, 'Fechar', { duration: 3000 });
+  }
+
+  public openCategoryDialog(): void {
+    this.dialog.open(CategoryDialogComponent, {
+      width: '600px',
+      disableClose: true,
+    });
   }
 }
