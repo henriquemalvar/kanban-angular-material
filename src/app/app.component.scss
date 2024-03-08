@@ -8,22 +8,23 @@
   width: 80vw;
 }
 
-.logo {
-  font-size: 24px;
-  font-weight: bold;
-  flex-grow: 1;
-}
-
-.logo-icon {
-  height: 50px;
-  width: 50px;
-}
-
 .sidenav-content {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 10%;
+}
+
+.sidenav-divider {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.sidenav-buttons {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 20px;
 }
 
 button {
@@ -32,9 +33,4 @@ button {
   &:last-child {
     margin-right: 0;
   }
-}
-
-.sidenav-divider {
-  width: 100%;
-  margin-bottom: 20px;
 }
