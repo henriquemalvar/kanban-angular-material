@@ -10,22 +10,21 @@
       style="display: none"
       (change)="onFileSelected($event)"
     />
-    <div (click)="fileInput.click()" class="photo-card">
+    <div class="photo-card photo-content" (click)="fileInput.click()">
       <img
-        [src]="selectedImageUrl"
+        [src]="displayedImage"
         alt="Foto de perfil"
         class="profile-photo"
-        (error)="selectedImageUrl = 'assets/images/default-user.jpeg'"
+        (error)="displayedImage = 'assets/images/default-user.jpeg'"
         height="100"
         width="100"
-        (click)="fileInput.click()"
       />
       <div class="overlay">
         <div class="text">Alterar</div>
       </div>
     </div>
   </div>
-  <form [formGroup]="registerForm" class="form">
+  <form [formGroup]="form" class="form">
     <mat-form-field appearance="outline" class="form-field">
       <mat-label>Nome</mat-label>
       <input
@@ -34,11 +33,7 @@
         type="text"
         placeholder="Insira seu nome"
       />
-      <mat-error
-        *ngIf="
-          registerForm.get('name')?.invalid && registerForm.get('name')?.touched
-        "
-      >
+      <mat-error *ngIf="form.get('name')?.invalid && form.get('name')?.touched">
         O nome é obrigatório.
       </mat-error>
     </mat-form-field>
@@ -52,10 +47,7 @@
         placeholder="Insira seu email"
       />
       <mat-error
-        *ngIf="
-          registerForm.get('email')?.invalid &&
-          registerForm.get('email')?.touched
-        "
+        *ngIf="form.get('email')?.invalid && form.get('email')?.touched"
       >
         Por favor, insira um email válido.
       </mat-error>
@@ -75,10 +67,7 @@
         }}</mat-icon>
       </button>
       <mat-error
-        *ngIf="
-          registerForm.get('password')?.invalid &&
-          registerForm.get('password')?.touched
-        "
+        *ngIf="form.get('password')?.invalid && form.get('password')?.touched"
       >
         A senha é obrigatória e deve ter pelo menos 6 caracteres.
       </mat-error> </mat-form-field
@@ -87,7 +76,7 @@
       <input
         matInput
         [type]="hideNewPassword ? 'password' : 'text'"
-        formControlName="newPassword"
+        formControlName="new_password"
         placeholder="Insira sua nova senha"
       />
       <button
@@ -101,8 +90,7 @@
       </button>
       <mat-error
         *ngIf="
-          registerForm.get('newPassword')?.invalid &&
-          registerForm.get('newPassword')?.touched
+          form.get('newPassword')?.invalid && form.get('newPassword')?.touched
         "
       >
         A nova senha é obrigatória e deve ter pelo menos 6 caracteres.
@@ -114,7 +102,6 @@
       mat-raised-button
       color="primary"
       type="submit"
-      [disabled]="registerForm.invalid"
       (click)="onSubmit()"
     >
       {{ user ? "Atualizar" : "Registrar" }}

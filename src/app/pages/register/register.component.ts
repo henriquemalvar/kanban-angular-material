@@ -1,8 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { User } from '@interfaces/user/user.interface';
-import { CategoryService } from '@services/category/category.service';
+import { Router } from '@angular/router';
+import { ISession } from '@interfaces/session/session.interface';
+import { IUser } from '@interfaces/user/user.interface';
+import { AuthService } from '@services/auth/auth.service';
 import { UserEventService } from '@services/user-event/user-event.service';
 import { UserService } from '@services/user/user.service';
 import { firstValueFrom } from 'rxjs';
@@ -11,24 +13,25 @@ import { firstValueFrom } from 'rxjs';
   selector: 'app-register',
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RegisterComponent implements OnInit {
-  public registerForm!: FormGroup;
-  public selectedImageUrl: string | ArrayBuffer =
-    'assets/images/default-user.jpeg';
-  public selectedImageFile!: File;
+  public form: FormGroup;
+  public displayedImage!: string;
+  public selectedFile: File | null = null;
   public hidePassword = true;
   public hideNewPassword = true;
-  public user: User | null = null;
+  public user!: IUser;
 
   constructor(
     private formBuilder: FormBuilder,
     private userService: UserService,
     private userEventService: UserEventService,
-    private categoryService: CategoryService,
-    private snackBar: MatSnackBar
+    private authService: AuthService,
+    private snackBar: MatSnackBar,
+    private router: Router
   ) {
-    this.registerForm = this.formBuilder.group({
+    this.form = this.formBuilder.group({
       name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
@@ -38,40 +41,34 @@ export class RegisterComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.user = localStorage.getItem('user')
-      ? JSON.parse(localStorage.getItem('user') || '{}')
-      : null;
-    if (this.user) {
-      this.user.photo
-        ? (this.selectedImageUrl = this.user.photo as string)
-        : null;
-      this.registerForm.patchValue({
-        name: this.user.name,
-        email: this.user.email,
-        photo: this.user.photo,
-      });
-      this.registerForm
-        .get('new_password')
-        ?.setValidators([Validators.required, Validators.minLength(6)]);
-      this.registerForm.get('new_password')?.updateValueAndValidity();
-    }
+    this.authService.getCurrentUser().subscribe((user: IUser | null) => {
+      if (user) {
+        this.user = user;
+        const { name, email, photo } = this.user;
+        this.displayedImage = photo || this.displayedImage;
+        this.form.patchValue({ name, email, photo });
+        this.form
+          .get('new_password')
+          ?.setValidators([Validators.required, Validators.minLength(6)]);
+        this.form.get('new_password')?.updateValueAndValidity();
+      }
+    });
   }
 
-  public async onSubmit() {
-    if (this.registerForm.invalid) {
+  async onSubmit(): Promise<void> {
+    if (this.form.invalid) {
       return;
     }
 
-    const formData = new FormData();
-    formData.append('name', this.registerForm.get('name')?.value);
-    formData.append('email', this.registerForm.get('email')?.value);
-    formData.append('password', this.registerForm.get('password')?.value);
-    if (this.user)
-      formData.append(
-        'new_password',
-        this.registerForm.get('new_password')?.value
-      );
-    if (this.selectedImageFile) formData.append('file', this.selectedImageFile);
+    const { name, email, password, new_password } = this.form.value;
+    const formData: FormData = new FormData();
+    formData.append('name', name);
+    formData.append('email', email);
+    formData.append('password', password);
+    if (this.user) {
+      formData.append('new_password', new_password);
+    }
+    if (this.selectedFile) formData.append('file', this.selectedFile);
 
     if (this.user) {
       await this.updateUser(this.user._id, formData);
@@ -80,118 +77,92 @@ export class RegisterComponent implements OnInit {
     }
   }
 
-  private async createUser(formData: FormData) {
+  private async createUser(formData: FormData): Promise<void> {
     try {
-      const user = await firstValueFrom(this.userService.create(formData));
+      const user: IUser = await firstValueFrom(
+        this.userService.create(formData)
+      );
       this.snackBar.open('Usuário criado com sucesso!', 'Fechar', {
         duration: 3000,
       });
-      console.log('🚀 ~ RegisterComponent ~ createUser ~ user._id:', user._id);
 
-      await this.createDefaultCategories(user._id);
-    } catch (error: any) {
-      this.snackBar.open('Erro ao criar usuário: ' + error.message, 'Fechar', {
-        duration: 3000,
+      const { email, password } = this.form.value;
+      this.authService.login({ email, password }).subscribe({
+        next: (session) => this.handleSuccessfulLogin(session),
+        error: () => this.handleFailedLogin(),
       });
-    }
-  }
-
-  private async createDefaultCategories(userId: string) {
-    const defaultCategory = [
-      {
-        name: 'Bug',
-        color: '#f97316',
-      },
-      {
-        name: 'Melhoria',
-        color: '#3b82f6',
-      },
-      {
-        name: 'Feature',
-        color: '#10b981',
-      },
-      {
-        name: 'Sprint',
-        color: '#eab308',
-      },
-      {
-        name: 'Review',
-        color: '#6b7280',
-      },
-      {
-        name: 'Não planejada',
-        color: '#8b5cf6',
-      },
-      {
-        name: 'Urgente',
-        color: '#ef4444',
-      },
-      {
-        name: 'Estória',
-        color: '#a25b5b',
-      },
-    ];
-
-    const promises = defaultCategory.map((category) =>
-      firstValueFrom(this.categoryService.create(userId, category))
-    );
-
-    for (const promise of promises) {
-      try {
-        await promise;
-      } catch (error: any) {
+    } catch (error: unknown) {
+      if (error instanceof Error) {
         this.snackBar.open(
-          'Erro ao criar categoria: ' + error.message,
+          'Erro ao criar usuário: ' + error.message,
           'Fechar',
           {
             duration: 3000,
           }
         );
-        // break;
+      } else {
+        this.snackBar.open('Erro desconhecido ao criar usuário', 'Fechar', {
+          duration: 3000,
+        });
       }
     }
   }
 
-  private async updateUser(_id: string, formData: FormData) {
+  private handleSuccessfulLogin(session: ISession): void {
+    localStorage.setItem('token', session.token);
+    if (session.user.photo) {
+      session.user.photo = this.userService.getPhotoUrl(session.user.photo);
+    }
+    const user = JSON.stringify(session.user);
+    localStorage.setItem('user', user);
+    this.userEventService.emit(session.user);
+    this.router.navigate(['/']);
+  }
+
+  private handleFailedLogin(): void {
+    this.snackBar.open(
+      'Falha no login. Por favor, tente novamente.',
+      'Fechar',
+      {
+        duration: 3000,
+      }
+    );
+  }
+
+  private async updateUser(id: string, formData: FormData): Promise<void> {
     try {
-      const userPromise = this.userService.update(_id, formData);
-      const user = await firstValueFrom(userPromise);
+      const user: IUser = await firstValueFrom(
+        this.userService.update(id, formData)
+      );
       this.snackBar.open('Usuário atualizado com sucesso!', 'Fechar', {
         duration: 3000,
       });
-      user.photo && typeof user.photo === 'string'
-        ? (user.photo = this.userService.getPhotoUrl(user.photo))
-        : null;
+      if (typeof user.photo === 'string') {
+        user.photo = this.userService.getPhotoUrl(user.photo);
+      }
+
       localStorage.setItem('user', JSON.stringify(user));
       this.userEventService.emit(user);
-    } catch (error: any) {
-      this.snackBar.open(
-        'Erro ao atualizar usuário: ' + error.message,
-        'Fechar',
-        {
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        this.snackBar.open(
+          'Erro ao atualizar usuário: ' + error.message,
+          'Fechar',
+          { duration: 3000 }
+        );
+      } else {
+        this.snackBar.open('Erro desconhecido ao atualizar usuário', 'Fechar', {
           duration: 3000,
-        }
-      );
+        });
+      }
     }
   }
 
-  onFileSelected(event: any): void {
-    if (event.target.files && event.target.files[0]) {
-      const file = event.target.files[0];
-      this.selectedImageFile = file;
-
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        if (e.target?.result !== null) {
-          this.selectedImageUrl = e.target!.result as string | ArrayBuffer;
-        }
-      };
-      reader.readAsDataURL(file);
+  public onFileSelected(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    if (target.files && target.files[0]) {
+      this.selectedFile = target.files[0];
+      this.displayedImage = URL.createObjectURL(this.selectedFile);
     }
-  }
-
-  onFileChangeClick(event: MouseEvent, fileInput: HTMLElement): void {
-    event.preventDefault();
-    fileInput.click();
   }
 }
