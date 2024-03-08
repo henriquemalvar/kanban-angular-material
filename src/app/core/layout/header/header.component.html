@@ -2,7 +2,7 @@
   <div class="custom-toolbar">
     <app-logo class="logo"></app-logo>
 
-    <div class="search-section">
+    <div class="search-section" *ngIf="user">
       <app-search></app-search>
     </div>
     <div class="user-section">
