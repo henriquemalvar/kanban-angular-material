@@ -10,27 +10,35 @@
       Nova Task
     </button>
   </div>
-  <div class="body">
-    <div class="col" *ngFor="let status of headers">
+  <div class="body" cdkDropListGroup>
+    <div class="col" *ngFor="let header of headers; let i = index">
       <div class="header-col">
         <div class="header-col-title gray-3">
-          {{ status }}
+          {{ header }}
           <mat-chip class="gray-2-bg">
-            <span>{{ getTasksByStatus(status).length }}</span>
+            <span>{{ getCardsByStatus(header).length }}</span>
           </mat-chip>
         </div>
       </div>
       <button
         mat-button
         class="ghost-button gray-3 gray-2-bg"
-        (click)="openDialog(status)"
+        (click)="openDialog(header)"
       >
         <mat-icon>add</mat-icon>
         <span>Nova task</span>
       </button>
-      <div class="content gray-2-bg">
-        <ng-container *ngFor="let task of getTasksByStatus(status)">
-          <app-task-card [task]="task"></app-task-card>
+      <div
+        class="content gray-2-bg"
+        cdkDropList
+        [cdkDropListData]="getCardsByStatus(header)"
+        [id]="header"
+        (cdkDropListDropped)="drop($event)"
+        #dropList="cdkDropList"
+        [cdkDropListConnectedTo]="headers"
+      >
+        <ng-container *ngFor="let item of getCardsByStatus(header)">
+          <app-task-card [task]="item" cdkDrag></app-task-card>
         </ng-container>
       </div>
     </div>

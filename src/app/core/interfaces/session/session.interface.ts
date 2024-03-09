@@ -1,6 +1,6 @@
-import { User } from '../user/user.interface';
+import { IUser } from '../user/user.interface';
 
-export interface Session {
-  user: User;
+export interface ISession {
+  user: IUser;
   token: string;
 }

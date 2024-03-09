@@ -1,9 +1,7 @@
 import { Component, Input } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
-import { User } from '@interfaces/user/user.interface';
+import { IUser } from '@interfaces/user/user.interface';
 import { AuthService } from '@services/auth/auth.service';
 import { UserEventService } from '@services/user-event/user-event.service';
-
 
 @Component({
   selector: 'app-user-card',
@@ -11,12 +9,11 @@ import { UserEventService } from '@services/user-event/user-event.service';
   styleUrls: ['./user-card.component.scss'],
 })
 export class UserCardComponent {
-  @Input() user!: User;
+  @Input() user!: IUser;
 
   constructor(
     private authService: AuthService,
     private userEventService: UserEventService,
-    private dialog: MatDialog
   ) {}
 
   public logout() {
@@ -24,5 +21,4 @@ export class UserCardComponent {
     this.userEventService.emit(null);
     window.location.reload();
   }
-
 }

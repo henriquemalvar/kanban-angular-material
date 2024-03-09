@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { User } from '@interfaces/user/user.interface';
+import { IUser } from '@interfaces/user/user.interface';
+import { AuthService } from '@services/auth/auth.service';
 import { UserEventService } from '@services/user-event/user-event.service';
 
 @Component({
@@ -8,28 +9,24 @@ import { UserEventService } from '@services/user-event/user-event.service';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit {
-  title = 'template-angular-material';
-  public user: User | null = null;
+  public title: string = 'template-angular-material';
+  public user!: IUser;
 
   constructor(
+    private authService: AuthService,
     private userEventService: UserEventService
   ) {}
 
   ngOnInit() {
-    this.loadUserFromLocalStorage();
-    this.subscribeToUserEvents();
+    this.loadUser();
   }
 
-  private loadUserFromLocalStorage() {
-    const user = localStorage.getItem('user');
-    if (user) {
-      this.user = JSON.parse(user);
-    }
-  }
-
-  private subscribeToUserEvents() {
-    this.userEventService.get().subscribe((user) => {
-      this.user = user;
+  private loadUser() {
+    this.authService.getCurrentUser().subscribe((user: IUser | null) => {
+      if (user) {
+        this.user = user;
+        this.userEventService.emit(user);
+      }
     });
   }
 }

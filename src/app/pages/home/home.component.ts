@@ -1,12 +1,20 @@
-import { Component, OnInit } from '@angular/core';
+import {
+  CdkDragDrop,
+  CdkDropList,
+  transferArrayItem,
+} from '@angular/cdk/drag-drop';
+import { Component, OnInit, QueryList, ViewChildren } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Task } from '@interfaces/task/task.interface';
+
+import { ITask } from '@interfaces/task/task.interface';
+import { IUser } from '@interfaces/user/user.interface';
 import { TaskService } from '@services/task/task.service';
 import { FilterEventService } from '@services/filter-event/filter-event.service';
 import { TaskEventService } from '@services/task-event/task-event.service';
-import { UserEventService } from '@services/user-event/user-event.service';
+
 import { TaskDialogComponent } from './components/task-dialog/task-dialog.component';
+import { AuthService } from '@services/auth/auth.service';
 
 @Component({
   selector: 'app-home',
@@ -14,74 +22,104 @@ import { TaskDialogComponent } from './components/task-dialog/task-dialog.compon
   styleUrls: ['./home.component.scss'],
 })
 export class HomeComponent implements OnInit {
-  headers: string[] = ['Não iniciado', 'Em progresso', 'Completo'];
-  tasks: Task[] = [];
+  @ViewChildren(CdkDropList) public dropLists!: QueryList<CdkDropList>;
+  public headers: string[] = ['Não iniciado', 'Em progresso', 'Completo'];
+  public cards: ITask[] = [];
+  private user!: IUser;
 
   constructor(
-    private taskService: TaskService,
-    private userEventService: UserEventService,
+    private cardService: TaskService,
+    private authService: AuthService,
     private taskEventService: TaskEventService,
     private dialog: MatDialog,
     private filterEventService: FilterEventService,
     private snackBar: MatSnackBar
   ) {}
 
-  ngOnInit(): void {
-    const user = JSON.parse(localStorage.getItem('user') ?? '{}');
-    if (user?._id) {
-      this.loadTasks(user._id);
-    }
-
-    this.subscribeToUserEvents(user);
-    this.subscribeToTaskEvents(user);
-    this.subscribeToFilterEvents(user);
-  }
-
-  subscribeToUserEvents(user: any): void {
-    this.userEventService.get().subscribe((user) => {
-      if (user?._id) {
-        this.loadTasks(user._id);
+  public ngOnInit(): void {
+    this.authService.getCurrentUser().subscribe((user: IUser | null) => {
+      if (user) {
+        this.user = user;
+        this.updateCards(user._id);
       }
     });
+
+    this.subscribeToEvents();
   }
 
-  subscribeToTaskEvents(user: any): void {
+  private subscribeToEvents(): void {
     this.taskEventService.get().subscribe(() => {
-      if (user?._id) this.loadTasks(user._id);
+      if (this.user) {
+        this.updateCards(this.user._id);
+      }
     });
-  }
 
-  subscribeToFilterEvents(user: any): void {
-    this.filterEventService.get().subscribe((filter) => {
-      if (filter) {
-        this.taskService
-          .get(user?._id, { title: filter })
-          .subscribe((tasks) => {
-            if (tasks?.length) {
-              this.tasks = tasks;
-            }
-          });
+    this.filterEventService.get().subscribe((filter: string) => {
+      if (filter && this.user) {
+        this.updateCards(this.user._id, { title: filter });
       }
     });
   }
 
-  loadTasks(userId: string): void {
-    this.taskService.get(userId).subscribe((tasks) => {
-      if (tasks?.length) {
-        this.tasks = tasks;
-      }
+  private updateCards(userId: string, filter?: { title: string }): void {
+    this.cardService.get(userId, filter).subscribe((cards: ITask[]) => {
+      this.cards = cards;
     });
   }
 
-  getTasksByStatus(status: string): Task[] {
-    return this.tasks.filter((tasks) => tasks.status === status);
+  public getCardsByStatus(status: string): ITask[] {
+    return this.cards.filter((card) => card.status === status) || [];
   }
 
-  openDialog(status?: string): void {
+  public openDialog(status?: string): void {
     this.dialog.open(TaskDialogComponent, {
       width: '600px',
       disableClose: true,
-      data: { status: status, mode: 'create' },
+      data: { status: status },
     });
+  }
+
+  public drop(event: CdkDragDrop<ITask[]>): void {
+    if (event.previousContainer !== event.container) {
+      transferArrayItem(
+        event.previousContainer.data,
+        event.container.data,
+        event.previousIndex,
+        event.currentIndex
+      );
+
+      const movedItem = event.container.data[event.currentIndex];
+      movedItem.status = event.container.id;
+
+      const updatedItem: ITask = {
+        _id: movedItem._id,
+        title: movedItem.title,
+        description: movedItem.description,
+        status: movedItem.status,
+        user_id: movedItem.user?._id!,
+        categories_ids: (movedItem.categories?.map((category) => category._id) || []).filter((id): id is string => id !== undefined),
+      };
+
+      this.cardService.update(movedItem._id, updatedItem).subscribe({
+        next: (updatedCard: ITask) => {
+          this.snackBar.open(
+            'Status do cartão atualizado com sucesso!',
+            'Fechar',
+            {
+              duration: 2000,
+            }
+          );
+        },
+        error: (error: any) => {
+          this.snackBar.open(
+            'Erro ao atualizar o status do cartão.',
+            'Fechar',
+            {
+              duration: 2000,
+            }
+          );
+        },
+      });
+    }
   }
 }

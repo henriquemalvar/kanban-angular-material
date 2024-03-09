@@ -4,7 +4,7 @@
 </h3>
 
 <mat-dialog-content class="content">
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form">
+  <form [formGroup]="form" class="form">
     <mat-form-field appearance="outline" class="form-field">
       <mat-label>Nome</mat-label>
       <input
@@ -50,29 +50,45 @@
       </mat-form-field>
     </div>
     <div class="flex-column">
-      <label id="listboxLabel">Categorias</label>
+      <div class="fxLayout" fxLayoutAlign="space-between center">
+        <label id="listboxLabel">Categorias</label>
+        <mat-icon
+          class="settings-icon"
+          (click)="openCategoryDialog()"
+          matTooltip="Gerenciar categorias"
+          >settings</mat-icon
+        >
+      </div>
+
       <mat-chip-listbox #chipList multiple aria-labelledby="listboxLabel">
-        <ng-container *ngFor="let category of categoriesOptions">
+        <ng-container *ngFor="let category of getSelectedCategories()">
           <mat-chip
-            *ngIf="isCategorySelected(category.label)"
             [ngStyle]="{
-              'background-color': category.label | categoryBackgroundColor
+              'background-color': category.color | categoryBackgroundColor
             }"
             color="primary"
-            (click)="toggleCategory(category)"
           >
-            <span [ngStyle]="{ color: category.label | categoryTextColor }">{{
-              category.label
+            <span [ngStyle]="{ color: category.color | categoryTextColor }">{{
+              category.name
             }}</span>
-          </mat-chip>
-          <mat-chip
-            *ngIf="!isCategorySelected(category.label)"
-            (click)="toggleCategory(category)"
-          >
-            {{ category.label }}
           </mat-chip>
         </ng-container>
       </mat-chip-listbox>
+      <mat-form-field class="form-field" appearance="outline">
+        <mat-label>Selecionar Categorias</mat-label>
+        <mat-select
+          panelClass="my-panel"
+          multiple
+          formControlName="categories_ids"
+        >
+          <mat-option
+            *ngFor="let category of categoriesOptions"
+            [value]="category._id"
+          >
+            {{ category.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
     </div>
   </form>
 </mat-dialog-content>

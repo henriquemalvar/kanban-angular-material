@@ -1,4 +1,4 @@
-import { Category } from '@interfaces/category/category.interface';
+import { ICategory } from '@interfaces/category/category.interface';
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -12,15 +12,15 @@ export class CategoryService {
 
   constructor(private http: HttpClient) {}
 
-  create(userId: string, category: Category): Observable<Category> {
-    return this.http.post<Category>(
+  create(userId: string, category: ICategory): Observable<ICategory> {
+    return this.http.post<ICategory>(
       `${this.baseUrl}/category/${userId}`,
       category
     );
   }
 
-  get(userId: string): Observable<Category[]> {
-    return this.http.get<Category[]>(`${this.baseUrl}/category/${userId}`);
+  get(userId: string): Observable<ICategory[]> {
+    return this.http.get<ICategory[]>(`${this.baseUrl}/category/${userId}`);
   }
 
   delete(id: string): Observable<void> {

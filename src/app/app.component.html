@@ -4,16 +4,27 @@
       <app-logo></app-logo>
       <mat-divider class="sidenav-divider"></mat-divider>
       <app-search></app-search>
-      <div class="user-section">
+      <div>
         <app-user-card
           *ngIf="user; else loginRegister"
           [user]="user"
         ></app-user-card>
 
         <ng-template #loginRegister>
-          <div class="login-register-options">
-            <button mat-stroked-button routerLink="/login">Entrar</button>
-            <button mat-raised-button color="primary" routerLink="/register">
+          <div class="sidenav-buttons">
+            <button
+              mat-stroked-button
+              class="ghost-button gray-4"
+              routerLink="/login"
+            >
+              Entrar
+            </button>
+            <button
+              mat-flat-button
+              color="primary"
+              class="primary-bg"
+              routerLink="/register"
+            >
               Registrar
             </button>
           </div>
