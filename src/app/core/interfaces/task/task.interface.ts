@@ -2,7 +2,7 @@ import { ICategory } from '@interfaces/category/category.interface';
 import { IUser } from '@interfaces/user/user.interface';
 
 export interface ITask {
-  _id: string;
+  id: string;
   status: string | 'Não iniciado' | 'Em progresso' | 'Completo';
   title: string;
   description: string;

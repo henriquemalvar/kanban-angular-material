@@ -15,7 +15,7 @@ export class TaskService {
   constructor(private http: HttpClient) {}
 
   create(userId: string, task: ITask): Observable<ITask> {
-    return this.http.post<ITask>(`${this.baseUrl}/task/${userId}`, task);
+    return this.http.post<ITask>(`${this.baseUrl}/card/${userId}`, task);
   }
 
   get(userId: string, filters?: Partial<ITask>): Observable<ITask[]> {
@@ -28,14 +28,14 @@ export class TaskService {
         }
       });
     }
-    return this.http.get<ITask[]>(`${this.baseUrl}/task/${userId}`, { params });
+    return this.http.get<ITask[]>(`${this.baseUrl}/card/${userId}`, { params });
   }
 
   delete(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/task/${id}`);
+    return this.http.delete<void>(`${this.baseUrl}/card/${id}`);
   }
 
   update(id: string, task: ITask): Observable<ITask> {
-    return this.http.put<ITask>(`${this.baseUrl}/task/${id}`, task);
+    return this.http.put<ITask>(`${this.baseUrl}/card/${id}`, task);
   }
 }

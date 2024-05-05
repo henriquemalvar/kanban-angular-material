@@ -8,18 +8,18 @@ import {
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { catchError, of, tap } from 'rxjs';
 
-import { TaskService } from '@services/task/task.service';
+import { CategoryEventService } from '@services/category-event/category-event.service';
 import { CategoryService } from '@services/category/category.service';
 import { TaskEventService } from '@services/task-event/task-event.service';
-import { CategoryEventService } from '@services/category-event/category-event.service';
+import { TaskService } from '@services/task/task.service';
 
-import { ITask } from '@interfaces/task/task.interface';
 import { ICategory } from '@interfaces/category/category.interface';
 import { IOption } from '@interfaces/option/option.interface';
+import { ITask } from '@interfaces/task/task.interface';
 import { IUser } from '@interfaces/user/user.interface';
 
-import { CategoryDialogComponent } from '@shared/components/category-dialog/category-dialog.component';
 import { AuthService } from '@services/auth/auth.service';
+import { CategoryDialogComponent } from '@shared/components/category-dialog/category-dialog.component';
 
 interface DialogData {
   task?: ITask;
@@ -66,13 +66,13 @@ export class TaskDialogComponent implements OnInit {
 
     if (this.mode === 'update') {
       this.form.patchValue({
-        user_id: this.data?.task?.user_id || this.user?._id || '',
+        user_id: this.data?.task?.user_id || this.user?.id || '',
         title: this.data?.task?.title || '',
         description: this.data?.task?.description || '',
         status: this.data?.task?.status || this.data.status || '',
         categories_ids:
           this.data?.task?.categories?.map(
-            (category: ICategory) => category._id
+            (category: ICategory) => category.id
           ) || [],
       });
     }
@@ -82,7 +82,7 @@ export class TaskDialogComponent implements OnInit {
     this.authService.getCurrentUser().subscribe((user: IUser | null) => {
       if (user) {
         this.user = user;
-        this.form.patchValue({ user_id: this.user._id });
+        this.form.patchValue({ user_id: this.user.id });
         this.loadCategories();
       }
     });
@@ -93,11 +93,11 @@ export class TaskDialogComponent implements OnInit {
   }
 
   private async loadCategories() {
-    if (!this.user || !this.user._id) {
+    if (!this.user || !this.user.id) {
       return;
     }
 
-    this.categoryService.get(this.user?._id).subscribe((categories) => {
+    this.categoryService.get(this.user?.id).subscribe((categories) => {
       if (!categories || categories.length === 0) {
         return;
       }
@@ -107,10 +107,10 @@ export class TaskDialogComponent implements OnInit {
   }
 
   public onSubmit(): void {
-    if (this.form.invalid) {
-      this.openSnackBar('Preencha todos os campos obrigatórios!');
-      return;
-    }
+    // if (this.form.invalid) {
+    //   this.openSnackBar('Preencha todos os campos obrigatórios!');
+    //   return;
+    // }
 
     const action =
       this.mode === 'create' ? this.createTask() : this.updateTask();
@@ -135,11 +135,11 @@ export class TaskDialogComponent implements OnInit {
   }
 
   private createTask() {
-    return this.cardService.create(this.user._id, this.form.value);
+    return this.cardService.create(this.user.id, this.form.value);
   }
 
   private updateTask() {
-    return this.cardService.update(this.data.task?._id || '', this.form.value);
+    return this.cardService.update(this.data.task?.id || '', this.form.value);
   }
 
   public onCancel(): void {
@@ -150,7 +150,7 @@ export class TaskDialogComponent implements OnInit {
     const categories_ids = this.form.get('categories_ids')?.value;
     return (
       this.categoriesOptions.filter((category) =>
-        categories_ids.includes(category._id)
+        categories_ids.includes(category.id)
       ) || []
     );
   }

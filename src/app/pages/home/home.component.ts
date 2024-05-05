@@ -9,12 +9,12 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { ITask } from '@interfaces/task/task.interface';
 import { IUser } from '@interfaces/user/user.interface';
-import { TaskService } from '@services/task/task.service';
 import { FilterEventService } from '@services/filter-event/filter-event.service';
 import { TaskEventService } from '@services/task-event/task-event.service';
+import { TaskService } from '@services/task/task.service';
 
-import { TaskDialogComponent } from './components/task-dialog/task-dialog.component';
 import { AuthService } from '@services/auth/auth.service';
+import { TaskDialogComponent } from './components/task-dialog/task-dialog.component';
 
 @Component({
   selector: 'app-home',
@@ -34,13 +34,13 @@ export class HomeComponent implements OnInit {
     private dialog: MatDialog,
     private filterEventService: FilterEventService,
     private snackBar: MatSnackBar
-  ) {}
+  ) { }
 
   public ngOnInit(): void {
     this.authService.getCurrentUser().subscribe((user: IUser | null) => {
       if (user) {
         this.user = user;
-        this.updateCards(user._id);
+        this.updateCards(user.id);
       }
     });
 
@@ -50,13 +50,13 @@ export class HomeComponent implements OnInit {
   private subscribeToEvents(): void {
     this.taskEventService.get().subscribe(() => {
       if (this.user) {
-        this.updateCards(this.user._id);
+        this.updateCards(this.user.id);
       }
     });
 
     this.filterEventService.get().subscribe((filter: string) => {
       if (filter && this.user) {
-        this.updateCards(this.user._id, { title: filter });
+        this.updateCards(this.user.id, { title: filter });
       }
     });
   }
@@ -92,15 +92,15 @@ export class HomeComponent implements OnInit {
       movedItem.status = event.container.id;
 
       const updatedItem: ITask = {
-        _id: movedItem._id,
+        id: movedItem.id,
         title: movedItem.title,
         description: movedItem.description,
         status: movedItem.status,
-        user_id: movedItem.user?._id!,
-        categories_ids: (movedItem.categories?.map((category) => category._id) || []).filter((id): id is string => id !== undefined),
+        user_id: movedItem.user?.id!,
+        categories_ids: (movedItem.categories?.map((category) => category.id) || []).filter((id): id is string => id !== undefined),
       };
 
-      this.cardService.update(movedItem._id, updatedItem).subscribe({
+      this.cardService.update(movedItem.id, updatedItem).subscribe({
         next: (updatedCard: ITask) => {
           this.snackBar.open(
             'Status do cartão atualizado com sucesso!',

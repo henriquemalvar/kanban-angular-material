@@ -71,7 +71,7 @@ export class RegisterComponent implements OnInit {
     if (this.selectedFile) formData.append('file', this.selectedFile);
 
     if (this.user) {
-      await this.updateUser(this.user._id, formData);
+      await this.updateUser(this.user.id, formData);
     } else {
       await this.createUser(formData);
     }

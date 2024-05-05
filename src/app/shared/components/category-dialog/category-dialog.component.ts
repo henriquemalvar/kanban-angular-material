@@ -51,7 +51,7 @@ export class CategoryDialogComponent implements OnInit {
   }
 
   private loadCategories(user: IUser) {
-    this.categoryService.get(user._id).subscribe({
+    this.categoryService.get(user.id).subscribe({
       next: (categories) => {
         this.categories = categories;
         this.filteredCategories = categories;
@@ -66,7 +66,7 @@ export class CategoryDialogComponent implements OnInit {
 
   public onCreate(): void {
     if (this.form.valid) {
-      this.categoryService.create(this.user._id, this.form.value).subscribe({
+      this.categoryService.create(this.user.id, this.form.value).subscribe({
         next: (category) => {
           this.categories.push(category);
           this.form.reset();
@@ -96,7 +96,7 @@ export class CategoryDialogComponent implements OnInit {
     this.categoryService.delete(id).subscribe({
       next: () => {
         this.categories = this.categories.filter(
-          (category) => category._id !== id
+          (category) => category.id !== id
         );
         this.snackBar.open('Categoria deletada com sucesso', 'Fechar', {
           duration: 3000,

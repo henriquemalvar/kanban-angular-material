@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -6,13 +6,13 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ITask } from '@interfaces/task/task.interface';
 import { IUser } from '@interfaces/user/user.interface';
 
-import { TaskService } from '@services/task/task.service';
 import { TaskEventService } from '@services/task-event/task-event.service';
+import { TaskService } from '@services/task/task.service';
 import { UserEventService } from '@services/user-event/user-event.service';
 
-import { TaskDialogComponent } from '../task-dialog/task-dialog.component';
-import { ConfirmDialogComponent } from '@shared/components/confirm-dialog/confirm-dialog.component';
 import { AuthService } from '@services/auth/auth.service';
+import { ConfirmDialogComponent } from '@shared/components/confirm-dialog/confirm-dialog.component';
+import { TaskDialogComponent } from '../task-dialog/task-dialog.component';
 
 @Component({
   selector: 'app-task-card',
@@ -30,7 +30,7 @@ export class TaskCardComponent implements OnInit {
     private taskEventService: TaskEventService,
     private userEventService: UserEventService,
     private snackBar: MatSnackBar
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.authService.getCurrentUser().subscribe((user: IUser | null) => {
@@ -71,7 +71,7 @@ export class TaskCardComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.cardService.delete(task._id).subscribe((response) => {
+        this.cardService.delete(task.id).subscribe((response) => {
           this.snackBar.open('Tarefa excluída com sucesso!', 'Fechar', {
             duration: 3000,
           });

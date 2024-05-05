@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiBaseUrl: 'http://localhost:3333/api',
+  apiBaseUrl: 'https://nodejs-nest-postgresql.cyclic.app',
 };
