@@ -11,5 +11,5 @@ export interface ITask {
   user_id: string;
   user?: IUser;
   categories?: ICategory[];
-  categories_ids: string[];
+  category_ids: string[];
 }

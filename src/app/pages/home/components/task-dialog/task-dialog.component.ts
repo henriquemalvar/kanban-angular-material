@@ -61,7 +61,7 @@ export class TaskDialogComponent implements OnInit {
       title: ['', Validators.required],
       description: ['', Validators.required],
       status: [data.status || '', Validators.required],
-      categories_ids: [[], Validators.required],
+      category_ids: [[], Validators.required],
     });
 
     if (this.mode === 'update') {
@@ -70,7 +70,7 @@ export class TaskDialogComponent implements OnInit {
         title: this.data?.task?.title || '',
         description: this.data?.task?.description || '',
         status: this.data?.task?.status || this.data.status || '',
-        categories_ids:
+        category_ids:
           this.data?.task?.categories?.map(
             (category: ICategory) => category.id
           ) || [],
@@ -147,10 +147,10 @@ export class TaskDialogComponent implements OnInit {
   }
 
   public getSelectedCategories(): ICategory[] {
-    const categories_ids = this.form.get('categories_ids')?.value;
+    const category_ids = this.form.get('category_ids')?.value;
     return (
       this.categoriesOptions.filter((category) =>
-        categories_ids.includes(category.id)
+        category_ids.includes(category.id)
       ) || []
     );
   }

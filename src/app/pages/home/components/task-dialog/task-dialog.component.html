@@ -7,12 +7,7 @@
   <form [formGroup]="form" class="form">
     <mat-form-field appearance="outline" class="form-field">
       <mat-label>Nome</mat-label>
-      <input
-        matInput
-        type="text"
-        formControlName="title"
-        placeholder="Nome da tarefa"
-      />
+      <input matInput type="text" formControlName="title" placeholder="Nome da tarefa" />
       <mat-error *ngIf="hasError('title', 'required')">
         O nome é obrigatório
       </mat-error>
@@ -20,14 +15,8 @@
 
     <mat-form-field appearance="outline" class="form-field">
       <mat-label>Descrição</mat-label>
-      <textarea
-        matInput
-        type="text"
-        formControlName="description"
-        placeholder="Descrição da tarefa"
-        rows="5"
-        class="no-resize"
-      ></textarea>
+      <textarea matInput type="text" formControlName="description" placeholder="Descrição da tarefa" rows="5"
+        class="no-resize"></textarea>
       <mat-error *ngIf="hasError('description', 'required')">
         A descrição é obrigatória
       </mat-error>
@@ -37,10 +26,7 @@
       <mat-form-field appearance="outline" class="form-field flex-item">
         <mat-label>Status</mat-label>
         <mat-select formControlName="status">
-          <mat-option
-            *ngFor="let status of statusOptions"
-            [value]="status.value"
-          >
+          <mat-option *ngFor="let status of statusOptions" [value]="status.value">
             {{ status.label }}
           </mat-option>
         </mat-select>
@@ -52,39 +38,25 @@
     <div class="flex-column">
       <div class="fxLayout" fxLayoutAlign="space-between center">
         <label id="listboxLabel">Categorias</label>
-        <mat-icon
-          class="settings-icon"
-          (click)="openCategoryDialog()"
-          matTooltip="Gerenciar categorias"
-          >settings</mat-icon
-        >
+        <mat-icon class="settings-icon" (click)="openCategoryDialog()"
+          matTooltip="Gerenciar categorias">settings</mat-icon>
       </div>
 
       <mat-chip-listbox #chipList multiple aria-labelledby="listboxLabel">
         <ng-container *ngFor="let category of getSelectedCategories()">
-          <mat-chip
-            [ngStyle]="{
+          <mat-chip [ngStyle]="{
               'background-color': category.color | categoryBackgroundColor
-            }"
-            color="primary"
-          >
+            }" color="primary">
             <span [ngStyle]="{ color: category.color | categoryTextColor }">{{
               category.name
-            }}</span>
+              }}</span>
           </mat-chip>
         </ng-container>
       </mat-chip-listbox>
       <mat-form-field class="form-field" appearance="outline">
         <mat-label>Selecionar Categorias</mat-label>
-        <mat-select
-          panelClass="my-panel"
-          multiple
-          formControlName="categories_ids"
-        >
-          <mat-option
-            *ngFor="let category of categoriesOptions"
-            [value]="category.id"
-          >
+        <mat-select panelClass="my-panel" multiple formControlName="category_ids">
+          <mat-option *ngFor="let category of categoriesOptions" [value]="category.id">
             {{ category.name }}
           </mat-option>
         </mat-select>
@@ -93,21 +65,10 @@
   </form>
 </mat-dialog-content>
 <mat-dialog-actions [align]="'end'" class="actions">
-  <button
-    mat-stroked-button
-    type="button"
-    class="cancel-button gray-4"
-    (click)="onCancel()"
-  >
+  <button mat-stroked-button type="button" class="cancel-button gray-4" (click)="onCancel()">
     Cancelar
   </button>
-  <button
-    mat-raised-button
-    color="primary"
-    class="primary-bg"
-    type="submit"
-    (click)="onSubmit()"
-  >
+  <button mat-raised-button color="primary" class="primary-bg" type="submit" (click)="onSubmit()">
     Salvar
   </button>
 </mat-dialog-actions>

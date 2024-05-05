@@ -36,6 +36,7 @@ export class TaskService {
   }
 
   update(id: string, task: ITask): Observable<ITask> {
-    return this.http.put<ITask>(`${this.baseUrl}/card/${id}`, task);
+    console.log("🚀 ~ TaskService ~ update ~ task:", task)
+    return this.http.patch<ITask>(`${this.baseUrl}/card/${id}`, task);
   }
 }

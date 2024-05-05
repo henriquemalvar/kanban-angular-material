@@ -97,7 +97,7 @@ export class HomeComponent implements OnInit {
         description: movedItem.description,
         status: movedItem.status,
         user_id: movedItem.user?.id!,
-        categories_ids: (movedItem.categories?.map((category) => category.id) || []).filter((id): id is string => id !== undefined),
+        category_ids: (movedItem.categories?.map((category) => category.id) || []).filter((id): id is string => id !== undefined),
       };
 
       this.cardService.update(movedItem.id, updatedItem).subscribe({
